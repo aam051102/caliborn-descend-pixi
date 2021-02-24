@@ -1,71 +1,3 @@
-function recursiveEffect(effectsObj, keyframes, keyframesPrev, diff, j) {
-    const keys = Object.keys(keyframes);
-
-    if(keys.length == 0) {
-        target = effectsObj;
-        return;
-    }
-
-    keys.forEach((type) => {
-        if(keyframes[type].length !== undefined) {
-            if(!effectsObj[type]) {
-                effectsObj[type] = [];
-            }
-
-            for(let i = 0; i < keyframes[type].length; i++) {
-                let base = (keyframes[type][i] - keyframesPrev[type][i]) / diff;
-                effectsObj[type][i] = keyframesPrev[type][i] + (base * j);
-            }
-
-            return;
-        } else {
-            if(!effectsObj[type]) {
-                effectsObj[type] = {};
-            }
-
-            recursiveEffect(effectsObj[type], keyframes[type], keyframesPrev[type], diff, j);
-        }
-    })
-}
-
-function addTimedEffect(timeline, keyframes) {
-    const frames = {};
-
-    let start = -1;
-
-    for (var i in keyframes) {
-        frames[i] = {e: keyframes[i]};
-
-        let end = parseInt(i, 10);
-
-        if(start != -1) {
-            let diff = end - start;
-
-            for(let j = 1; j < diff; j++) {
-                const effectsObj = {};
-                
-                recursiveEffect(effectsObj, keyframes[i], keyframes[start], diff, j);
-
-                frames[start + j] = {
-                    e: effectsObj
-                };
-            }
-        }
-
-        start = end;
-    }
-
-    for(var i in frames) {
-        if(timeline[i]) {
-            timeline[i].e = frames[i].e;
-        } else {
-            timeline[i] = frames[i];
-        }
-    }
-
-    return timeline;
-}
-
 (function (PIXI, lib) {
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
     PIXI.settings.ROUND_PIXELS = true;
@@ -100,6 +32,74 @@ function addTimedEffect(timeline, keyframes) {
     });
 
     // Functions
+    function recursiveEffect(effectsObj, keyframes, keyframesPrev, diff, j) {
+        const keys = Object.keys(keyframes);
+    
+        if(keys.length == 0) {
+            target = effectsObj;
+            return;
+        }
+    
+        keys.forEach((type) => {
+            if(keyframes[type].length !== undefined) {
+                if(!effectsObj[type]) {
+                    effectsObj[type] = [];
+                }
+    
+                for(let i = 0; i < keyframes[type].length; i++) {
+                    let base = (keyframes[type][i] - keyframesPrev[type][i]) / diff;
+                    effectsObj[type][i] = keyframesPrev[type][i] + (base * j);
+                }
+    
+                return;
+            } else {
+                if(!effectsObj[type]) {
+                    effectsObj[type] = {};
+                }
+    
+                recursiveEffect(effectsObj[type], keyframes[type], keyframesPrev[type], diff, j);
+            }
+        })
+    }
+    
+    function addTimedEffect(timeline, keyframes) {
+        const frames = {};
+    
+        let start = -1;
+    
+        for (var i in keyframes) {
+            frames[i] = {e: keyframes[i]};
+    
+            let end = parseInt(i, 10);
+    
+            if(start != -1) {
+                let diff = end - start;
+    
+                for(let j = 1; j < diff; j++) {
+                    const effectsObj = {};
+                    
+                    recursiveEffect(effectsObj, keyframes[i], keyframes[start], diff, j);
+    
+                    frames[start + j] = {
+                        e: effectsObj
+                    };
+                }
+            }
+    
+            start = end;
+        }
+    
+        for(var i in frames) {
+            if(timeline[i]) {
+                timeline[i].e = frames[i].e;
+            } else {
+                timeline[i] = frames[i];
+            }
+        }
+    
+        return timeline;
+    }
+
     function setVolume(volume) {
         PIXI.sound.volumeAll = volume;
     }

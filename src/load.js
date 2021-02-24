@@ -15,7 +15,8 @@ PIXI.Loader.shared.onComplete.add((e) => {
     preloader_dom.addEventListener("click", () => {
         preloader_dom.classList.add("transition");
         logo_dom.classList.add("transition");
-
+        
+        MainLoop.start();
         setTimeout(() => {
             preloader_dom.remove();
             scene.instance.play();
@@ -25,11 +26,12 @@ PIXI.Loader.shared.onComplete.add((e) => {
 
 // Replace main loop to update when tab is blurred
 PIXI.Ticker.shared.autoStart = false;
-PIXI.Ticker.shared.minFPS = 1;
+//PIXI.Ticker.shared.minFPS = 1;
+PIXI.Ticker.shared.stop();
 
 MainLoop.setUpdate((delta) => {
     PIXI.Ticker.shared.update();
-}).start();
+})
 
 // Load scene
 var scene = new PIXI.animate.Scene({
